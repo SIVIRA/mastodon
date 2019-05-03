@@ -35,6 +35,7 @@ import {
   COMPOSE_POLL_OPTION_CHANGE,
   COMPOSE_POLL_OPTION_REMOVE,
   COMPOSE_POLL_SETTINGS_CHANGE,
+  COMPOSE_HEART_COUNT_CHANGE,
 } from '../actions/compose';
 import { TIMELINE_DELETE } from '../actions/timelines';
 import { STORE_HYDRATE } from '../actions/store';
@@ -55,6 +56,7 @@ const initialState = ImmutableMap({
   caretPosition: null,
   preselectDate: null,
   in_reply_to: null,
+  with_heart_count: 0,
   is_composing: false,
   is_submitting: false,
   is_changing_upload: false,
@@ -95,6 +97,7 @@ function clearAll(state) {
     map.set('is_submitting', false);
     map.set('is_changing_upload', false);
     map.set('in_reply_to', null);
+    map.set('with_heart_count', 0);
     map.set('privacy', state.get('default_privacy'));
     map.set('sensitive', false);
     map.update('media_attachments', list => list.clear());
@@ -233,11 +236,16 @@ export default function compose(state = initialState, action) {
     return state
       .set('text', action.text)
       .set('idempotencyKey', uuid());
+  case COMPOSE_HEART_COUNT_CHANGE:
+    return state
+      .set('with_heart_count', action.count)
+      .set('idempotencyKey', uuid());
   case COMPOSE_COMPOSING_CHANGE:
     return state.set('is_composing', action.value);
   case COMPOSE_REPLY:
     return state.withMutations(map => {
       map.set('in_reply_to', action.status.get('id'));
+      map.set('with_heart_count', 0);
       map.set('text', statusToTextMentions(state, action.status));
       map.set('privacy', privacyPreference(action.status.get('visibility'), state.get('default_privacy')));
       map.set('focusDate', new Date());
@@ -257,6 +265,7 @@ export default function compose(state = initialState, action) {
   case COMPOSE_RESET:
     return state.withMutations(map => {
       map.set('in_reply_to', null);
+      map.set('with_heart_count', 0);
       map.set('text', '');
       map.set('spoiler', false);
       map.set('spoiler_text', '');
@@ -311,7 +320,10 @@ export default function compose(state = initialState, action) {
     return state.set('tagHistory', fromJS(action.tags));
   case TIMELINE_DELETE:
     if (action.id === state.get('in_reply_to')) {
-      return state.set('in_reply_to', null);
+      return state.withMutations(map => {
+        map.set('in_reply_to', null);
+        map.set('with_heart_count', 0);
+      });
     } else {
       return state;
     }
@@ -331,6 +343,7 @@ export default function compose(state = initialState, action) {
     return state.withMutations(map => {
       map.set('text', unescapeHTML(expandMentions(action.status)));
       map.set('in_reply_to', action.status.get('in_reply_to_id'));
+      map.set('with_heart_count', action.status.get('with_heart_count'));
       map.set('privacy', action.status.get('visibility'));
       map.set('media_attachments', action.status.get('media_attachments'));
       map.set('focusDate', new Date());

@@ -58,6 +58,8 @@ export const COMPOSE_POLL_OPTION_CHANGE   = 'COMPOSE_POLL_OPTION_CHANGE';
 export const COMPOSE_POLL_OPTION_REMOVE   = 'COMPOSE_POLL_OPTION_REMOVE';
 export const COMPOSE_POLL_SETTINGS_CHANGE = 'COMPOSE_POLL_SETTINGS_CHANGE';
 
+export const COMPOSE_HEART_COUNT_CHANGE = 'COMPOSE_HEART_COUNT_CHANGE';
+
 const messages = defineMessages({
   uploadErrorLimit: { id: 'upload_error.limit', defaultMessage: 'File upload limit exceeded.' },
   uploadErrorPoll:  { id: 'upload_error.poll', defaultMessage: 'File upload not allowed with polls.' },
@@ -123,11 +125,16 @@ export function directCompose(account, routerHistory) {
 
 export function submitCompose(routerHistory) {
   return function (dispatch, getState) {
-    const status = getState().getIn(['compose', 'text'], '');
+    var status = getState().getIn(['compose', 'text'], '');
     const media  = getState().getIn(['compose', 'media_attachments']);
 
     if ((!status || !status.length) && media.size === 0) {
       return;
+    }
+
+    const heartCount = +getState().getIn(['compose', 'with_heart_count'], '');
+    if (!Number.isNaN(heartCount) && heartCount > 0) {
+      status = `@send ${heartCount}\n${status}`;
     }
 
     dispatch(submitComposeRequest());
@@ -543,4 +550,11 @@ export function changePollSettings(expiresIn, isMultiple) {
     expiresIn,
     isMultiple,
   };
+};
+
+export function changeHeartCountChange(count) {
+  return {
+    type: COMPOSE_HEART_COUNT_CHANGE,
+    count
+  }
 };

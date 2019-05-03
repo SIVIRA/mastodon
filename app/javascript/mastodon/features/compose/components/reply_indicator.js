@@ -21,8 +21,10 @@ class ReplyIndicator extends ImmutablePureComponent {
 
   static propTypes = {
     status: ImmutablePropTypes.map,
+    heartCount: PropTypes.string,
     onCancel: PropTypes.func.isRequired,
     intl: PropTypes.object.isRequired,
+    onChangeHeartCount: PropTypes.func.isRequired,
   };
 
   handleClick = () => {
@@ -37,7 +39,7 @@ class ReplyIndicator extends ImmutablePureComponent {
   }
 
   render () {
-    const { status, intl } = this.props;
+    const { status, intl, heartCount, onChangeHeartCount } = this.props;
 
     if (!status) {
       return null;
@@ -60,6 +62,13 @@ class ReplyIndicator extends ImmutablePureComponent {
         </div>
 
         <div className='reply-indicator__content' style={style} dangerouslySetInnerHTML={content} />
+
+        <div className="reply-indicator__gem">
+          <input
+            type="text" placeholder="0" value={heartCount}
+            onChange={(event) => onChangeHeartCount(event.target.value)} />
+          <span><i className="fa fa-heart" /></span>
+        </div>
       </div>
     );
   }
