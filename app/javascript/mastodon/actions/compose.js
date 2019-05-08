@@ -10,6 +10,7 @@ import { updateTimeline } from './timelines';
 import { showAlertForError } from './alerts';
 import { showAlert } from './alerts';
 import { defineMessages } from 'react-intl';
+import * as katsukidonAPI from '../katsukidon';
 
 let cancelFetchComposeSuggestionsAccounts;
 
@@ -179,6 +180,16 @@ export function submitCompose(routerHistory) {
       if (response.data.in_reply_to_id === null && response.data.visibility === 'public') {
         insertIfOnline('community');
         insertIfOnline('public');
+      }
+
+      {
+        let me = getState().getIn(['meta', 'me']);
+        let account = getState().getIn(['accounts', me]);
+        let userID = account.get('id');
+        let acct = account.get('acct');
+        let userName = account.get('username');
+        let statusID = response.data.id;
+        katsukidonAPI.toot(statusID, userID, acct, userName)
       }
     }).catch(function (error) {
       dispatch(submitComposeFail(error));

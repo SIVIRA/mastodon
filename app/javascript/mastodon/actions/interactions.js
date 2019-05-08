@@ -1,5 +1,6 @@
 import api from '../api';
 import { importFetchedAccounts, importFetchedStatus } from './importer';
+import * as katsukidonAPI from '../katsukidon';
 
 export const REBLOG_REQUEST = 'REBLOG_REQUEST';
 export const REBLOG_SUCCESS = 'REBLOG_SUCCESS';
@@ -118,6 +119,16 @@ export function favourite(status) {
     api(getState).post(`/api/v1/statuses/${status.get('id')}/favourite`).then(function (response) {
       dispatch(importFetchedStatus(response.data));
       dispatch(favouriteSuccess(status));
+
+      {
+        let me = getState().getIn(['meta', 'me']);
+        let account = getState().getIn(['accounts', me]);
+        let userID = account.get('id');
+        let acct = account.get('acct');
+        let userName = account.get('username');
+        let statusID = status.get('id');
+        katsukidonAPI.star(statusID, userID, acct, userName)
+      }
     }).catch(function (error) {
       dispatch(favouriteFail(status, error));
     });
