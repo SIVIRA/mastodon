@@ -43,8 +43,8 @@
 
       var search = window.location.search;
       var searchParams = new URLSearchParams(search);
-      var email = searchParams.get('email');
-      var password = searchParams.get('password');
+      var email = decodeURIComponent(searchParams.get('email'));
+      var password = decodeURIComponent(searchParams.get('password'));
       console.log('email = ' + email + ", password = " + password);
 
       fetch('/about', { method: 'GET' })
