@@ -174,14 +174,7 @@ export default class DetailedStatus extends ImmutablePureComponent {
     }
 
     if (this.context.router) {
-      favouriteLink = (
-        <Link to={`/statuses/${status.get('id')}/favourites`} className='detailed-status__link'>
-          <Icon id='star' />
-          <span className='detailed-status__favorites'>
-            <FormattedNumber value={status.get('favourites_count')} />
-          </span>
-        </Link>
-      );
+      favouriteLink = <span style="display:none;"></span>
     } else {
       favouriteLink = (
         <a href={`/interact/${status.get('id')}?type=favourite`} className='detailed-status__link' onClick={this.handleModalLink}>

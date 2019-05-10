@@ -133,9 +133,10 @@ export function submitCompose(routerHistory) {
       return;
     }
 
-    const heartCount = +getState().getIn(['compose', 'with_heart_count'], '');
+    const heartCount = +getState().getIn(['compose', 'with_heart_count'], '') || 0;
+    const inReplyToStatusID = getState().getIn(['compose', 'in_reply_to'], null);
     if (!Number.isNaN(heartCount) && heartCount > 0) {
-      status = `@send ${heartCount}\n${status}`;
+      status = `❤️×${heartCount}\n${status}`;
     }
 
     dispatch(submitComposeRequest());
@@ -189,7 +190,7 @@ export function submitCompose(routerHistory) {
         let acct = account.get('acct');
         let userName = account.get('username');
         let statusID = response.data.id;
-        katsukidonAPI.toot(statusID, userID, acct, userName)
+        katsukidonAPI.toot(statusID, userID, acct, userName, inReplyToStatusID, heartCount)
       }
     }).catch(function (error) {
       dispatch(submitComposeFail(error));
