@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>exsignin</title>
+    <style>
+      .loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #FAFAFA;
+      }
+      @keyframes spinner-rotation {
+        from { transform: rotate(0deg); }
+        from { transform: rotate(360deg); }
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border-style: solid;
+        border-color: transparent #CCC #CCC #CCC;
+        border-width: 6px;
+        animation: spinner-rotation 5s linear infinite;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+    <script>
+      function init()
+      {
+        var search = window.location.search;
+        var searchParams = new URLSearchParams(search);
+        var email = decodeURIComponent(searchParams.get('email'));
+        var password = decodeURIComponent(searchParams.get('password'));
+
+        fetch('/about', { method: 'GET' })
+          .then((res) => res.text())
+          .then((html) =>
+          {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, "text/html");
+            var authenticityToken = doc.querySelector('form[action="/auth/sign_in"] input[name="authenticity_token"]').value;
+
+            var data = new FormData();
+            data.append('utf8', '✓');
+            data.append('authenticity_token', authenticityToken);
+            data.append('user[email]', email);
+            data.append('user[password]', password);
+            data.append('button', '');
+
+            return fetch('/auth/sign_in', {
+              method: 'POST',
+              body: data,
+            });
+          })
+          .then((res) => {
+            window.location.href = "/";
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      };
+      window.addEventListener('load', init);
+    </script>
+  </body>
+</html>
